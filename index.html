@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REWIND AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0b0b0b; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .card { width: 90%; max-width: 400px; background: #1a1a1a; padding: 30px; border-radius: 20px; text-align: center; border: 1px solid #333; }
+        h1 { color: #f1c40f; margin-bottom: 20px; letter-spacing: 2px; }
+        #chat-display { background: #222; padding: 15px; border-radius: 10px; min-height: 100px; margin-bottom: 20px; color: #ddd; border-left: 4px solid #f1c40f; text-align: left; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #111; color: white; margin-bottom: 15px; outline: none; }
+        button { width: 100%; padding: 15px; border-radius: 10px; border: none; background: #f1c40f; color: black; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>REWIND AI</h1>
+        <div id="chat-display">Yahan jawab dikhega...</div>
+        <input type="text" id="userInput" placeholder="Kuch likhein...">
+        <button onclick="talkToPast()">Magic Dekhein</button>
+    </div>
+
+    <script>
+        async function talkToPast() {
+            const input = document.getElementById('userInput');
+            const display = document.getElementById('chat-display');
+            const userText = input.value;
+
+            if(!userText) { alert("Pehle kuch likho!"); return; }
+
+            display.innerText = "Soch raha hoon... ✨";
+
+            const KEY = "AIzaSyDDLyqIUcIm9Ggr0nDLoO2AScXTX5MpW3Y";
+            const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
+
+            try {
+                const response = await fetch(URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Tu 8 saal ka bacha hai. Hindi mein jawab de: " + userText }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0].content) {
+                    const reply = data.candidates[0].content.parts[0].text;
+                    display.innerText = reply;
+
+                    // Voice Magic
+                    const msg = new SpeechSynthesisUtterance(reply);
+                    msg.lang = 'hi-IN';
+                    msg.pitch = 1.6;
+                    window.speechSynthesis.speak(msg);
+                } else {
+                    display.innerText = "Koshish jaari hai, phir se pucho!";
+                }
+            } catch (err) {
+                display.innerText = "Network slow hai, ek baar refresh karo.";
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
